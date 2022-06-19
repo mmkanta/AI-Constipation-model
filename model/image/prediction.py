@@ -76,7 +76,7 @@ def save_gradcam(img_path, heatmap, image_size, cam_path, alpha=0.4):
     superimposed_img.save(cam_path)
     return cam_path
 
-def predict(result_path, image_file):
+def make_prediction(result_path, image_file):
     image_size = 300
 
     model = load_model(os.path.join(BASE_DIR, "image", "model_image.h5"))

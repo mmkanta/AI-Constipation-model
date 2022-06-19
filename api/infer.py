@@ -22,7 +22,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMP_DIR = os.path.join(BASE_DIR, 'resources', 'temp')
 
 def remove_file(path):
-    print(path)
     if os.path.exists(path):
         shutil.rmtree(path)
         print("Finish clearing temporary file")
@@ -35,7 +34,7 @@ class QuestionnaireData(BaseModel):
 async def questionnaire_inference(inferData: QuestionnaireData):
     try:
         start_time = time.time()
-        result = questionnaire_model.predict(inferData.questionnaire)
+        result = questionnaire_model.make_prediction(inferData.questionnaire)
         print(f"Inference time: {time.time() - start_time :.2f} seconds")
         return JSONResponse(content={"success": True, "message": "Questionnaire infer successfully", "data": {
             "DD_probability": result
@@ -57,7 +56,7 @@ async def image_inference(file: UploadFile = File(...), background_tasks: Backgr
         with open(os.path.join(result_path, file.filename), "wb") as f:
             f.write(file.file.read())
 
-        _, _ = image_model.predict(result_path, file.filename)
+        _, _ = image_model.make_prediction(result_path, file.filename)
 
         print(f"Inference time: {time.time() - start_time :.2f} seconds")
 
