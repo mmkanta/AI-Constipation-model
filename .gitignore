@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# resources
+/resources
+/model/image/model_image.h5
