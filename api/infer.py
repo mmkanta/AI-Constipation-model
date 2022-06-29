@@ -28,7 +28,7 @@ def remove_file(path):
         print("Finish clearing temporary file")
 
 class QuestionnaireData(BaseModel):
-    questionnaire: List[int]
+    questionnaire: List[float]
 
 # questionnaire inference
 @router.post("/questionnaire", status_code=200)
@@ -88,7 +88,7 @@ async def integrated_inference(file: UploadFile = File(...), questionnaire: str 
                 raise Exception("Questionnaire must be array of integer")
             if len(question_list) != 15:
                 raise Exception("Length of questionnaire must be 15")
-            if not all(isinstance(x, int) for x in question_list):
+            if not all(isinstance(x, (float, int)) for x in question_list):
                 raise Exception("Questionnaire must be array of integer")
         except Exception as e:
             return JSONResponse(content={"success": False, "message": str(e)}, status_code=400)

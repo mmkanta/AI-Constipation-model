@@ -6,26 +6,35 @@ import matplotlib.cm as cm
 import os
 import json
 from .gradcam_generator import save_gradcam, make_gradcam_heatmap
+from efficientnet.tfkeras import EfficientNetB3
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+model = load_model(os.path.join(BASE_DIR, "image", "model_image.h5"))
+
+def make_gradcam(img, img_path, image_size, cam_path):
+    heatmap = make_gradcam_heatmap(img, model, 'top_activation')
+    _ = save_gradcam(img_path,
+                    heatmap,
+                    image_size,
+                    cam_path)
+    return
+    
 def make_prediction(result_path, image_file):
     image_size = 300
 
-    model = load_model(os.path.join(BASE_DIR, "image", "model_image.h5"))
+    img_path = os.path.join(result_path, image_file)
+    cam_path = os.path.join(result_path, "result", "gradcam.png")
+
     img = load_img(
-        os.path.join(result_path, image_file),
+        img_path,
         color_mode='rgb',
         target_size=(image_size, image_size)
     )
     img = np.expand_dims(img_to_array(img) / 255, axis=0)
     pred_result = model.predict(img)[0][0]
 
-    heatmap = make_gradcam_heatmap(img, model, 'top_activation')
-    cam_path = save_gradcam(os.path.join(result_path, image_file),
-                            heatmap,
-                            image_size,
-                            os.path.join(result_path, "result", "gradcam.png"))
+    make_gradcam(img, img_path, image_size, cam_path)
 
     with open(os.path.join(result_path, "result", "prediction.txt"), 'w') as f:
         json.dump({"DD_probability": float(pred_result)}, f)
