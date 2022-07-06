@@ -7,6 +7,7 @@ import os
 import json
 from .gradcam_generator import save_gradcam, make_gradcam_heatmap
 from efficientnet.tfkeras import EfficientNetB3
+import cv2
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -14,6 +15,11 @@ model = load_model(os.path.join(BASE_DIR, "image", "model_image.h5"))
 
 def make_gradcam(img, img_path, image_size, cam_path):
     heatmap = make_gradcam_heatmap(img, model, 'top_activation')
+
+    heatmap = cv2.resize(heatmap, (300, 300), cv2.INTER_LINEAR)
+    heatmap = np.maximum(heatmap, 0)
+    heatmap = heatmap / heatmap.max()
+    
     _ = save_gradcam(img_path,
                     heatmap,
                     image_size,
