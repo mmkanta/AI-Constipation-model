@@ -1,7 +1,7 @@
 fastapi==0.70.0
 numpy==1.22.4
 # onnxruntime==1.9.0
-# opencv-python==4.5.3.56
+opencv-python==4.6.0.66
 # openshift==0.12.1
 Pillow==9.1.1
 # pydicom==2.2.2
