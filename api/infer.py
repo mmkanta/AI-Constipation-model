@@ -33,9 +33,14 @@ class QuestionnaireData(BaseModel):
 # questionnaire inference
 @router.post("/questionnaire", status_code=200)
 async def questionnaire_inference(inferData: QuestionnaireData):
+    """
+    questionnaire must be array of number, length = 15
+    """
     try:
+        # validate questionnaire
         if len(inferData.questionnaire) != 15:
             return JSONResponse(content={"success": False, "message": "Length of questionnaire must be 15"}, status_code=400)
+        
         start_time = time.time()
         result = questionnaire_model.make_prediction(inferData.questionnaire)
         print(f"Inference time: {time.time() - start_time :.2f} seconds")
@@ -50,10 +55,17 @@ async def questionnaire_inference(inferData: QuestionnaireData):
 # image inference
 @router.post("/image", status_code=200)
 async def image_inference(file: UploadFile = File(...), background_tasks: BackgroundTasks = BackgroundTasks()):
+    """
+    file must be png or jpg image
+    """
     start_time = time.time()
     result_path = os.path.join(TEMP_DIR, f"{start_time}_{file.filename}")
     background_tasks.add_task(remove_file, os.path.join(result_path))
     try:
+        # validate image file
+        if not (file.content_type == 'image/png' or file.content_type == 'image/jpeg'):
+            return JSONResponse(content={"success": False, "message": "Image file must be png or jpg image"}, status_code=400)
+
         Path(os.path.join(result_path, "result")).mkdir(parents=True, exist_ok=True)
 
         with open(os.path.join(result_path, file.filename), "wb") as f:
@@ -63,6 +75,7 @@ async def image_inference(file: UploadFile = File(...), background_tasks: Backgr
 
         print(f"Inference time: {time.time() - start_time :.2f} seconds")
 
+        # make zip file of gradcam + prediction
         if os.path.exists(os.path.join(result_path, 'result')):
             shutil.make_archive(os.path.join(result_path, 'result'),
                                 'zip',
@@ -78,10 +91,15 @@ async def image_inference(file: UploadFile = File(...), background_tasks: Backgr
 # integrated inference
 @router.post("/integrate", status_code=200)
 async def integrated_inference(file: UploadFile = File(...), questionnaire: str = Form(...), background_tasks: BackgroundTasks = BackgroundTasks()):
+    """
+    file must be png or jpg image\n
+    questionnaire must be array of number, length = 15
+    """
     start_time = time.time()
     result_path = os.path.join(TEMP_DIR, f"{start_time}_{file.filename}")
     background_tasks.add_task(remove_file, os.path.join(result_path))
     try:
+        # validate questionnaire
         try:
             question_list = json.loads(questionnaire)
             if not isinstance(question_list, list):
@@ -92,6 +110,10 @@ async def integrated_inference(file: UploadFile = File(...), questionnaire: str 
                 raise Exception("Questionnaire must be array of integer")
         except Exception as e:
             return JSONResponse(content={"success": False, "message": str(e)}, status_code=400)
+
+        # validate image file
+        if not (file.content_type == 'image/png' or file.content_type == 'image/jpeg'):
+            return JSONResponse(content={"success": False, "message": "Image file must be png or jpg image"}, status_code=400)
             
         Path(os.path.join(result_path, "result")).mkdir(parents=True, exist_ok=True)
 
@@ -102,6 +124,7 @@ async def integrated_inference(file: UploadFile = File(...), questionnaire: str 
 
         print(f"Inference time: {time.time() - start_time :.2f} seconds")
 
+        # make zip file of gradcam + prediction
         if os.path.exists(os.path.join(result_path, 'result')):
             shutil.make_archive(os.path.join(result_path, 'result'),
                                 'zip',
