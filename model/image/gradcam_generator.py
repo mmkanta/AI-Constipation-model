@@ -1,12 +1,7 @@
 import numpy as np
 import tensorflow as tf
-#tf.compat.v1.enable_eager_execution()
-# tf.compat.v1.disable_eager_execution()
 from tensorflow.keras.utils import load_img, img_to_array, array_to_img
 import matplotlib.cm as cm
-# import cv2
-from tensorflow.keras import backend as K
-# import matplotlib.pyplot as plt
 
 # https://keras.io/examples/vision/grad_cam/
 def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None):
@@ -43,7 +38,7 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None
     # heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
     return heatmap.numpy()
 
-def save_gradcam(img_path, heatmap, image_size, cam_path, alpha=0.4):
+def save_gradcam(img_path, heatmap, image_size, cam_path, alpha=0.8):
     # Load the original image
     img = load_img(
         img_path,
@@ -70,10 +65,6 @@ def save_gradcam(img_path, heatmap, image_size, cam_path, alpha=0.4):
     # Superimpose the heatmap on original image
     superimposed_img = jet_heatmap * alpha + img
     superimposed_img = array_to_img(superimposed_img)
-
-    # plt.imshow(np.asarray(superimposed_img))
-    # plt.colorbar()
-    # plt.savefig(cam_path, dpi=150)
 
     # Save the superimposed image
     superimposed_img.save(cam_path)
