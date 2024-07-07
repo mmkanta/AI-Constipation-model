@@ -131,3 +131,6 @@ dmypy.json
 # resources
 /resources
 /model/image/model_image.h5
+/model/image/model_image2.pth
+/model/integrated/model_integrated2.pth
+
