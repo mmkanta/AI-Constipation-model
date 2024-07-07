@@ -32,20 +32,22 @@ class QuestionnaireData(BaseModel):
 
 # questionnaire inference
 @router.post("/questionnaire", status_code=200)
-async def questionnaire_inference(inferData: QuestionnaireData):
+async def questionnaire_inference(infer_data: QuestionnaireData):
     """
-    questionnaire must be array of number, length = 15
+    questionnaire must be array of number, length = 66
     """
+    print(f"INPUT1: {infer_data}")
     try:
         # validate questionnaire
-        if len(inferData.questionnaire) != 15:
-            return JSONResponse(content={"success": False, "message": "Length of questionnaire must be 15"}, status_code=400)
+        if len(infer_data.questionnaire) != 66:
+            return JSONResponse(content={"success": False, "message": "Length of questionnaire is incorrect"}, status_code=400)
         
         start_time = time.time()
-        result = questionnaire_model.make_prediction(inferData.questionnaire)
+        result, version = questionnaire_model.make_prediction(infer_data.questionnaire)
         print(f"Inference time: {time.time() - start_time :.2f} seconds")
         return JSONResponse(content={"success": True, "message": "Questionnaire infer successfully", "data": {
-            "DD_probability": result
+            "DD_probability": float(result),
+            "version": version
         }}, status_code=200)
     except Exception as e:
         print(traceback.format_exc())
@@ -95,6 +97,7 @@ async def integrated_inference(file: UploadFile = File(...), questionnaire: str 
     file must be png or jpg image\n
     questionnaire must be array of number, length = 15
     """
+    print(f"INPUT3: {questionnaire}")
     start_time = time.time()
     result_path = os.path.join(TEMP_DIR, f"{start_time}_{file.filename}")
     background_tasks.add_task(remove_file, os.path.join(result_path))

@@ -1,13 +1,15 @@
 import numpy as np
-import pickle
 import os
+from catboost import CatBoostClassifier
+
+MODEL_VERSION = "2"
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-model_path = os.path.join(BASE_DIR, "questionnaire", "model_questionnaire.pkl")
+model_path = os.path.join(BASE_DIR, "questionnaire", "model.cbm")
 
-with open(model_path, 'rb') as f:
-    model = pickle.load(f)
+model = CatBoostClassifier()
+model.load_model(model_path)
 
 def make_prediction(questionnaire):
-    result = model.predict_proba(np.array([questionnaire]))[0][1]
-    return result
+    result = model.predict(np.array(questionnaire).reshape(1, 66))[0]
+    return result, MODEL_VERSION
